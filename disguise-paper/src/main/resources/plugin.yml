@@ -1,0 +1,18 @@
+name: DisguisePaper
+version: 1.0.0
+main: dev.plug.disguise.paper.DisguisePaper
+api-version: '1.20'
+description: Companion GUI plugin for the Disguise Velocity plugin.
+authors:
+  - plug
+
+commands:
+  disguisegui:
+    description: Opens the disguise GUI.
+    usage: /disguisegui
+    permission: disguise.gui
+
+permissions:
+  disguise.gui:
+    description: Allows opening the disguise GUI.
+    default: true

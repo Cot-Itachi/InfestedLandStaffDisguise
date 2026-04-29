@@ -1,0 +1,12 @@
+{
+  "saveOnQuit": true,
+  "persistDisguise": true,
+  "ranks": [
+    { "id": "owner",   "prefix": "[Owner] ",   "suffix": "", "colorHex": "#ff0000" },
+    { "id": "admin",   "prefix": "[Admin] ",   "suffix": "", "colorHex": "#ff4500" },
+    { "id": "mod",     "prefix": "[Mod] ",     "suffix": "", "colorHex": "#00aaff" },
+    { "id": "builder", "prefix": "[Builder] ", "suffix": "", "colorHex": "#00ff00" },
+    { "id": "vip",     "prefix": "[VIP] ",     "suffix": "", "colorHex": "#ffcc00" },
+    { "id": "player",  "prefix": "",           "suffix": "", "colorHex": "#ffffff" }
+  ]
+}
