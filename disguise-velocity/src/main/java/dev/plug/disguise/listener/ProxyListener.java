@@ -96,9 +96,10 @@ public final class ProxyListener {
         Component chatLine = DisguiseMessages.chat(displayName, event.getMessage());
         server.getAllPlayers().forEach(target -> target.sendMessage(chatLine));
         logger.info("<{}> {}", displayName, event.getMessage());
-
-
-        event.setResult(PlayerChatEvent.ChatResult.message(""));
+        // Use allowed() so the signed message reaches Paper with its signature intact.
+        // Paper's onChat handler suppresses the raw display with event.viewers().clear().
+        // Changing the message content (e.g. message("")) breaks the signature and kicks the player.
+        event.setResult(PlayerChatEvent.ChatResult.allowed());
     }
 
     @Subscribe
