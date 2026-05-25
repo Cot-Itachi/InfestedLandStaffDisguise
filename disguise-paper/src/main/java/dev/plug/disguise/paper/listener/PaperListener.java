@@ -38,12 +38,7 @@ public final class PaperListener implements Listener {
             return;
         }
 
-        // Use Component title comparison instead of the legacy String form.
-        // In modern Paper, getView().getTitle() serializes Component titles
-        // differently from LegacyComponentSerializer, so the String check
-        // always fails and clicks never route to the handlers below.
-        // event.getView().title() returns the original Component — safe to
-        // compare directly with equals().
+
         Component title = event.getView().title();
         if (DisguiseGui.TITLE_MAIN_COMPONENT.equals(title)) {
             event.setCancelled(true);
@@ -68,10 +63,7 @@ public final class PaperListener implements Listener {
             return;
         }
 
-        // Do NOT call event.setCancelled(true) — Paper 1.19.1+ cannot cancel signed chat
-        // messages and will forcibly disconnect the player with a FATAL error if we try.
-        // Clearing the viewer set achieves the same result (nobody sees the raw input
-        // message in public chat) without touching the signed-message lifecycle at all.
+
         event.viewers().clear();
 
         String input = PlainTextComponentSerializer.plainText().serialize(event.originalMessage());
