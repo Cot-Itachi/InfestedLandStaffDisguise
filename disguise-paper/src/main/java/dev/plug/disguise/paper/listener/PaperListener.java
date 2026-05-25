@@ -5,6 +5,7 @@ import dev.plug.disguise.paper.gui.DisguiseGui;
 import dev.plug.disguise.paper.input.InputSession;
 import dev.plug.disguise.paper.messaging.ProxyBridge;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -37,8 +38,14 @@ public final class PaperListener implements Listener {
             return;
         }
 
-        String title = event.getView().getTitle();
-        if (DisguiseGui.TITLE_MAIN.equals(title)) {
+        // Use Component title comparison instead of the legacy String form.
+        // In modern Paper, getView().getTitle() serializes Component titles
+        // differently from LegacyComponentSerializer, so the String check
+        // always fails and clicks never route to the handlers below.
+        // event.getView().title() returns the original Component — safe to
+        // compare directly with equals().
+        Component title = event.getView().title();
+        if (DisguiseGui.TITLE_MAIN_COMPONENT.equals(title)) {
             event.setCancelled(true);
             if (event.getCurrentItem() != null) {
                 handleMainClick(player, event.getSlot());
@@ -46,7 +53,7 @@ public final class PaperListener implements Listener {
             return;
         }
 
-        if (DisguiseGui.TITLE_RANK.equals(title)) {
+        if (DisguiseGui.TITLE_RANK_COMPONENT.equals(title)) {
             event.setCancelled(true);
             if (event.getCurrentItem() != null) {
                 handleRankClick(player, event.getSlot(), event.getInventory().getSize());
