@@ -29,7 +29,7 @@ import java.util.UUID;
 public final class ProxyListener {
 
     private static final MinecraftChannelIdentifier CHANNEL =
-        MinecraftChannelIdentifier.from(PluginChannels.SYNC);
+            MinecraftChannelIdentifier.from(PluginChannels.SYNC);
 
     private final ProxyServer server;
     private final Logger logger;
@@ -96,7 +96,14 @@ public final class ProxyListener {
         Component chatLine = DisguiseMessages.chat(displayName, event.getMessage());
         server.getAllPlayers().forEach(target -> target.sendMessage(chatLine));
         logger.info("<{}> {}", displayName, event.getMessage());
-        event.setResult(PlayerChatEvent.ChatResult.denied());
+
+        // Do NOT use ChatResult.denied() — Minecraft 1.19.1+ signs chat messages and
+        // the proxy must not outright drop them or it violates the protocol handshake,
+        // causing "A proxy plugin caused an illegal protocol state".
+        // Setting an empty message suppresses the original from appearing in chat
+        // while still satisfying the signed-message lifecycle.
+        // (mirrors the same pattern used on the Paper side: event.viewers().clear())
+        event.setResult(PlayerChatEvent.ChatResult.message(""));
     }
 
     @Subscribe
@@ -160,8 +167,8 @@ public final class ProxyListener {
 
     private Component formatResult(DisguiseManager.Result result) {
         return result.ok()
-            ? DisguiseMessages.success(result.message())
-            : DisguiseMessages.error(result.message());
+                ? DisguiseMessages.success(result.message())
+                : DisguiseMessages.error(result.message());
     }
 
     private String buildChatName(Player player, DisguiseData data) {
