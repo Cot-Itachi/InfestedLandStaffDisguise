@@ -34,56 +34,47 @@ public final class PaperListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
         Component title = event.getView().title();
+
         if (DisguiseGui.TITLE_MAIN_COMPONENT.equals(title)) {
             event.setCancelled(true);
-            if (event.getCurrentItem() != null) {
-                handleMainClick(player, event.getSlot());
-            }
+            if (event.getCurrentItem() != null) handleMainClick(player, event.getSlot());
             return;
         }
 
         if (DisguiseGui.TITLE_RANK_COMPONENT.equals(title)) {
             event.setCancelled(true);
-            if (event.getCurrentItem() != null) {
-                handleRankClick(player, event.getSlot(), event.getInventory().getSize());
-            }
+            if (event.getCurrentItem() != null) handleRankClick(player, event.getSlot(), event.getInventory().getSize());
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
-        if (!inputSession.hasPending(player)) {
+
+        if (inputSession.hasPending(player)) {
+            event.viewers().clear();
+            String input = PlainTextComponentSerializer.plainText().serialize(event.originalMessage());
+            if (event.isAsynchronous()) {
+                plugin.getServer().getScheduler().runTask(plugin, () -> inputSession.fulfill(player, input));
+            } else {
+                inputSession.fulfill(player, input);
+            }
             return;
         }
 
-
-        event.viewers().clear();
-
-        String input = PlainTextComponentSerializer.plainText().serialize(event.originalMessage());
-        if (event.isAsynchronous()) {
-            plugin.getServer().getScheduler().runTask(plugin, () -> inputSession.fulfill(player, input));
-            return;
+        if (plugin.isDisguiseActive(player.getUniqueId())) {
+            event.viewers().clear();
         }
-
-        inputSession.fulfill(player, input);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        if (!inputSession.hasPending(player)) {
-            return;
-        }
-
-        String raw = event.getMessage();
-        if ("/cancel".equalsIgnoreCase(raw)) {
+        if (!inputSession.hasPending(player)) return;
+        if ("/cancel".equalsIgnoreCase(event.getMessage())) {
             event.setCancelled(true);
             inputSession.fulfill(player, "cancel");
         }
@@ -92,6 +83,7 @@ public final class PaperListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         inputSession.cancel(event.getPlayer());
+        plugin.clearDisguiseState(event.getPlayer().getUniqueId());
     }
 
     private void handleMainClick(Player player, int slot) {
@@ -99,17 +91,10 @@ public final class PaperListener implements Listener {
             case 11 -> gui.promptNick(player);
             case 13 -> gui.promptSkin(player);
             case 15 -> gui.openRankSelection(player, new ArrayList<>(plugin.getRankIds()));
-            case 29 -> {
-                player.closeInventory();
-                proxyBridge.requestToggle(player);
-            }
-            case 31 -> {
-                player.closeInventory();
-                proxyBridge.requestClear(player);
-            }
+            case 29 -> { player.closeInventory(); proxyBridge.requestToggle(player); }
+            case 31 -> { player.closeInventory(); proxyBridge.requestClear(player); }
             case 33 -> player.closeInventory();
-            default -> {
-            }
+            default -> {}
         }
     }
 
@@ -118,7 +103,6 @@ public final class PaperListener implements Listener {
             gui.openMain(player);
             return;
         }
-
         List<String> rankIds = new ArrayList<>(plugin.getRankIds());
         if (slot < rankIds.size()) {
             player.closeInventory();

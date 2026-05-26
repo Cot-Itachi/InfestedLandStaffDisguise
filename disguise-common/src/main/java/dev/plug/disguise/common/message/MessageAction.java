@@ -5,5 +5,6 @@ public enum MessageAction {
     REQUEST_SKIN,
     REQUEST_RANK,
     REQUEST_TOGGLE,
-    REQUEST_CLEAR
+    REQUEST_CLEAR,
+    SYNC_STATE
 }

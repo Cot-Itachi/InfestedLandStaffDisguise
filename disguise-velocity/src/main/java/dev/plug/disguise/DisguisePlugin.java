@@ -7,21 +7,23 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import dev.plug.disguise.command.DisguiseCommand;
 import dev.plug.disguise.config.PluginConfig;
 import dev.plug.disguise.listener.ProxyListener;
 import dev.plug.disguise.skin.SkinFetcher;
 import dev.plug.disguise.storage.StorageManager;
+import dev.plug.disguise.common.PluginChannels;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
 
 @Plugin(
-    id = "disguise",
-    name = "Disguise",
-    version = "1.0.0",
-    description = "Advanced disguise plugin for network-wide nick, skin, and rank changes.",
-    authors = {"Cot_Itachi"}
+        id = "disguise",
+        name = "Disguise",
+        version = "1.0.0",
+        description = "Advanced disguise plugin for network-wide nick, skin, and rank changes.",
+        authors = {"Cot_Itachi"}
 )
 public final class DisguisePlugin {
 
@@ -48,19 +50,17 @@ public final class DisguisePlugin {
         pluginConfig.load();
         storageManager.load();
 
+        server.getChannelRegistrar().register(MinecraftChannelIdentifier.from(PluginChannels.SYNC));
+
         server.getCommandManager().register(
-            server.getCommandManager().metaBuilder("disguise")
-                .aliases("dis", "d")
-                .plugin(this)
-                .build(),
-            new DisguiseCommand(disguiseManager, pluginConfig).build()
+                server.getCommandManager().metaBuilder("disguise")
+                        .aliases("dis", "d")
+                        .plugin(this)
+                        .build(),
+                new DisguiseCommand(disguiseManager, pluginConfig).build()
         );
         server.getEventManager().register(this, new ProxyListener(
-            server,
-            logger,
-            disguiseManager,
-            storageManager,
-            pluginConfig
+                server, logger, disguiseManager, storageManager, pluginConfig
         ));
 
         logger.info("Disguise loaded with {} configured rank(s).", pluginConfig.getRanks().size());
